@@ -1,0 +1,59 @@
+cabal-version:   3.0
+name:            stock-quotes
+version:         0.1.0.0
+author:          Philg112
+category:        Data
+build-type:      Simple
+
+-- Extra doc files to be distributed with the package, such as a CHANGELOG or a README.
+extra-doc-files: CHANGELOG.md
+
+common warnings
+  ghc-options: -Wall
+
+library
+  import:           warnings
+  exposed-modules:
+    MyLib
+    QuoteData
+
+  build-depends:
+    , base                  ^>=4.16.4.0
+    , blaze-colonnade
+    , blaze-html
+    , bytestring
+    , cassava
+    , Chart
+    , Chart-diagrams
+    , colonnade
+    , fmt
+    , optparse-applicative
+    , text
+    , time
+
+  hs-source-dirs:   src
+  default-language: Haskell2010
+
+executable stock-quotes
+  import:           warnings
+  main-is:          Main.hs
+  build-depends:
+    , base          ^>=4.16.4.0
+    , stock-quotes
+
+  hs-source-dirs:   app
+  default-language: Haskell2010
+
+test-suite stock-quotes-test
+  import:             warnings
+  default-language:   Haskell2010
+  type:               exitcode-stdio-1.0
+  hs-source-dirs:     test
+  main-is:            Spec.hs
+  build-depends:
+    , base            ^>=4.16.4.0
+    , hspec
+    , hspec-discover
+    , stock-quotes
+
+  build-tool-depends: hspec-discover:hspec-discover
