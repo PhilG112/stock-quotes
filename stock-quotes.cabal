@@ -17,6 +17,7 @@ library
     Charts
     MyLib
     QuoteData
+    StatReport
 
   build-depends:
     , base                  ^>=4.16.4.0
