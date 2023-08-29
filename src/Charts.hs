@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Charts (plotChart) where
-import Data.Csv (decodeByName)
 
 import qualified Data.ByteString.Lazy as BL (readFile)
+import Data.Csv (decodeByName)
 import Data.Foldable (toList)
 import Graphics.Rendering.Chart.Backend.Diagrams
     ( FileFormat (SVG),
@@ -12,38 +12,39 @@ import Graphics.Rendering.Chart.Backend.Diagrams
       renderableToFile,
     )
 import Graphics.Rendering.Chart.Easy
-    ( opaque,
-      white,
-      gray,
+    ( Candle (Candle),
+      Default (def),
+      StackedLayout (StackedLayout),
+      ToPlot (toPlot),
+      ToRenderable (toRenderable),
       cyan,
+      gray,
       green,
       layout_plots,
       layout_title,
-      (.~),
-      solidFillStyle,
-      slayouts_layouts,
-      plot_lines_values,
-      plot_lines_title,
-      plot_lines_style,
-      plot_candle_width,
-      plot_candle_values,
-      plot_candle_title,
-      plot_candle_tick_length,
-      plot_candle_rise_fill_style,
-      plot_candle_line_style,
-      plot_candle_fill,
-      plot_candle_fall_fill_style,
-      plot_bars_values,
-      plot_bars_titles,
-      plot_bars_item_styles,
-      plotBars,
-      line_width,
       line_color,
-      ToPlot(toPlot),
-      StackedLayout(StackedLayout),
-      Default(def),
-      Candle(Candle),
-      ToRenderable(toRenderable) )
+      line_width,
+      opaque,
+      plotBars,
+      plot_bars_item_styles,
+      plot_bars_titles,
+      plot_bars_values,
+      plot_candle_fall_fill_style,
+      plot_candle_fill,
+      plot_candle_line_style,
+      plot_candle_rise_fill_style,
+      plot_candle_tick_length,
+      plot_candle_title,
+      plot_candle_values,
+      plot_candle_width,
+      plot_lines_style,
+      plot_lines_title,
+      plot_lines_values,
+      slayouts_layouts,
+      solidFillStyle,
+      white,
+      (.~),
+    )
 import QuoteData (QuoteData (..))
 
 plotChart :: Foldable t => String -> t QuoteData -> FilePath -> IO ()

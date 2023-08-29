@@ -1,9 +1,11 @@
+{-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -Wno-missing-fields #-}
 module StatReport where
 
 import Data.Foldable (maximumBy, minimumBy)
-import Data.Ord
-import Data.Time
-import QuoteData (QField, QuoteData (day))
+import Data.Ord ( comparing )
+import Data.Time ( diffDays )
+import QuoteData (QField (Volume), QuoteData (day), field2Fun)
 
 decimalPlacesFloating :: Integer
 decimalPlacesFloating = 2
@@ -17,7 +19,7 @@ data StatEntry = StatEntry
     { qField :: QField
     , meanVal :: StatValue
     , minVal :: StatValue
-    , maxVal :: StatEntry
+    , maxVal :: StatValue
     , daysBetweenMinMax :: Int
     }
 
@@ -44,4 +46,29 @@ computeMinMaxDays prop quotes = (prop minQuote, prop maxQuote, days)
         days = fromIntegral $ abs $ diffDays (day minQuote) (day maxQuote)
 
 statInfo :: (Functor t, Foldable t) => t QuoteData -> [StatEntry]
-statInfo quotes = _
+statInfo quotes = fmap qFieldStatInfo [minBound .. maxBound]
+    where
+        decimalPlacesbyQField :: QField -> Integer
+        decimalPlacesbyQField Volume = 0
+        decimalPlacesbyQField _ = decimalPlacesFloating
+
+        qFieldStatInfo :: QField -> StatEntry
+        qFieldStatInfo qfield =
+            let
+                get :: QuoteData -> Double
+                get qd = field2Fun qfield qd
+
+                (mn, mx, daysbetweenMinMax) = computeMinMaxDays get quotes
+
+                decPlaces :: Integer
+                decPlaces = decimalPlacesbyQField qfield
+
+                meanVal :: StatValue
+                meanVal = StatValue (fromIntegral decimalPlacesFloating) (mean $ fmap get quotes)
+
+                minVal :: StatValue
+                minVal = StatValue (fromIntegral decPlaces) mn
+                
+                maxVal :: StatValue
+                maxVal = StatValue (fromIntegral decPlaces) mx
+            in StatEntry {..}
