@@ -1,10 +1,15 @@
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -Wno-missing-fields #-}
+
 module StatReport where
 
+import Colonnade (Colonnade, Headed, ascii, headed)
 import Data.Foldable (maximumBy, minimumBy)
-import Data.Ord ( comparing )
-import Data.Time ( diffDays )
+import Data.Ord (comparing)
+import Data.Time (diffDays)
+import Fmt
 import QuoteData (QField (Volume), QuoteData (day), field2Fun)
 
 decimalPlacesFloating :: Integer
@@ -15,6 +20,10 @@ data StatValue = StatValue
     , value :: Double
     }
 
+instance Buildable StatValue where
+    build :: StatValue -> Builder
+    build sv = fixedF (decimalPlaces sv) (value sv)
+
 data StatEntry = StatEntry
     { qField :: QField
     , meanVal :: StatValue
@@ -22,6 +31,32 @@ data StatEntry = StatEntry
     , maxVal :: StatValue
     , daysBetweenMinMax :: Int
     }
+
+{- FOURMOLU_DISABLE -}
+instance Buildable StatEntry where
+    build :: StatEntry -> Builder
+    build StatEntry {..} =
+        "Stats for"+||qField||+ ": "
+            +|meanVal|+ " (mean), "
+            +|minVal|+ " (min), "
+            +|maxVal|+ " (max) "
+            +|daysBetweenMinMax|+ " (days)"
+{- FOURMOLU_DISABLE -}
+
+textReport :: [StatEntry] -> String
+textReport entries = ascii colStats entries
+    where
+        colStats :: Colonnade Headed StatEntry String
+        colStats = mconcat
+            [ headed "Quote Field" (show . qField)
+            , headed "Mean" (pretty . meanVal)
+            , headed "Min" (pretty . minVal)
+            , headed "Max" (pretty . maxVal)
+            , headed "Days between Min/Max" (pretty . daysBetweenMinMax)
+            ]
+
+showPrice :: Double -> Builder
+showPrice = fixedF (fromIntegral decimalPlacesFloating)
 
 mean :: (Fractional a, Foldable t) => t a -> a
 mean xs = sum xs / fromIntegral (length xs)
@@ -54,8 +89,7 @@ statInfo quotes = fmap qFieldStatInfo [minBound .. maxBound]
 
         qFieldStatInfo :: QField -> StatEntry
         qFieldStatInfo qfield =
-            let
-                get :: QuoteData -> Double
+            let get :: QuoteData -> Double
                 get qd = field2Fun qfield qd
 
                 (mn, mx, daysbetweenMinMax) = computeMinMaxDays get quotes
@@ -68,7 +102,7 @@ statInfo quotes = fmap qFieldStatInfo [minBound .. maxBound]
 
                 minVal :: StatValue
                 minVal = StatValue (fromIntegral decPlaces) mn
-                
+
                 maxVal :: StatValue
                 maxVal = StatValue (fromIntegral decPlaces) mx
-            in StatEntry {..}
+             in StatEntry {..}
