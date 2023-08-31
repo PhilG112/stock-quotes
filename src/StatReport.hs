@@ -10,6 +10,14 @@ import Data.Foldable (maximumBy, minimumBy)
 import Data.Ord (comparing)
 import Data.Time (diffDays)
 import Fmt
+    ( Builder,
+      (+|),
+      (+||),
+      pretty,
+      (|+),
+      (||+),
+      fixedF,
+      Buildable(..) )
 import QuoteData (QField (Volume), QuoteData (day), field2Fun)
 
 decimalPlacesFloating :: Integer
@@ -25,7 +33,7 @@ instance Buildable StatValue where
     build sv = fixedF (decimalPlaces sv) (value sv)
 
 data StatEntry = StatEntry
-    { qField :: QField
+    {  qField :: QField
     , meanVal :: StatValue
     , minVal :: StatValue
     , maxVal :: StatValue
@@ -92,7 +100,7 @@ statInfo quotes = fmap qFieldStatInfo [minBound .. maxBound]
             let get :: QuoteData -> Double
                 get qd = field2Fun qfield qd
 
-                (mn, mx, daysbetweenMinMax) = computeMinMaxDays get quotes
+                (mn, mx, _) = computeMinMaxDays get quotes
 
                 decPlaces :: Integer
                 decPlaces = decimalPlacesbyQField qfield
